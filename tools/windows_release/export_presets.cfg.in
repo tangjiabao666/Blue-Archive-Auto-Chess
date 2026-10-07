@@ -1,0 +1,29 @@
+[preset.0]
+name="Windows x86_64 Release"
+platform="Windows Desktop"
+runnable=true
+advanced_options=true
+export_filter="all_resources"
+include_filter="data/*.json,assets/*/runtime-metadata.json,assets/*/material-bindings.json,data/effects/*.nativeobj,data/effects/*.obj,data/effects/*.png"
+exclude_filter="tests/*,evidence/*,docs/*,tools/*,README*,run-prototype.*,*.py,*.pyc,*.md,*.log,assets/*/source_objects/*,assets/*/source_materials/*,assets/*/manifest.json,assets/*/texture-manifest.json,assets/*/visibility-manifest.json,assets/*/fidelity.json,assets/*/material-metadata.json,data/effects/*/ParticleSystem-*.json,data/effects/*/ParticleSystemRenderer-*.json,data/effects/*/MonoBehaviour-*.json,data/effects/*/Material-*.json,data/effects/*/Mesh-*.json,data/effects/*/Shader-*.json,data/effects/*/MeshFilter-*.json,data/effects/*/MeshRenderer-*.json,data/effects/*/Animator-*.json,data/effects/*/PlayableDirector-*.json,assets/characters/serina/*,battle.tscn,gallery.tscn,scripts/battle.gd,scripts/gallery.gd,scripts/native_impact.gd,scripts/native_muzzle.gd,core/arena_clock.gd,core/arena_sim.gd,core/battle_clock.gd,core/battle_sim.gd,core/weapon_profiles.gd"
+export_path=""
+script_export_mode=2
+
+[preset.0.options]
+custom_template/debug=""
+custom_template/release="@RELEASE_TEMPLATE@"
+debug/export_console_wrapper=2
+binary_format/embed_pck=false
+binary_format/architecture="x86_64"
+texture_format/s3tc_bptc=true
+texture_format/etc2_astc=false
+codesign/enable=false
+application/modify_resources=true
+application/product_name="Blue-A"
+application/file_description="Blue-A personal single-player build"
+application/file_version="0.1.0.0"
+application/product_version="0.1.0.0"
+application/export_angle=0
+application/export_d3d12=0
+shader_baker/enabled=false
+ssh_remote_deploy/enabled=false

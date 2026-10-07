@@ -1,0 +1,8 @@
+[gd_scene load_steps=2 format=3]
+[ext_resource type="Script" path="res://tests/visual_combat_harness.gd" id="1"]
+[node name="ExpandedNativeCombatQA" type="Node3D"]
+script = ExtResource("1")
+team_size = 3
+player_offset = 7
+opponent_offset = 3
+report_slug = "expanded-three-v-three"

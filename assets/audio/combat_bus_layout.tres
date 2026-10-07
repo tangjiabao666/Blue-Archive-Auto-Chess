@@ -1,0 +1,8 @@
+[gd_resource type="AudioBusLayout" format=3 uid="uid://bdti702h3h135"]
+
+[sub_resource type="AudioEffectHardLimiter" id="AudioEffectHardLimiter_combat"]
+resource_name = "Combat peak protection"
+
+[resource]
+bus/0/effect/0/effect = SubResource("AudioEffectHardLimiter_combat")
+bus/0/effect/0/enabled = true

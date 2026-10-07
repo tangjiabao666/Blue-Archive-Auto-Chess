@@ -1,0 +1,88 @@
+name: Source checks
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: source-checks-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  source:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      PYTHONUTF8: '1'
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: '3.11'
+      - name: Check public file boundaries and Python syntax
+        shell: python
+        run: |
+          import ast
+          from pathlib import Path
+          import subprocess
+
+          tracked = set(subprocess.check_output(['git', 'ls-files', '-z']).decode().split('\0')) - {''}
+          private = set(Path('docs/private-resource-paths.txt').read_text(encoding='utf-8').splitlines())
+          ignored = set(subprocess.check_output(['git', 'ls-files', '-z', '--cached', '--ignored', '--exclude-standard']).decode().split('\0')) - {''}
+          rejected = sorted((tracked & private) | ignored)
+          if rejected:
+              raise SystemExit('Private or ignored files tracked by Git: ' + ', '.join(rejected))
+          sources = sorted(path for path in tracked if path.endswith('.py'))
+          for path in sources:
+              ast.parse(Path(path).read_text(encoding='utf-8'), filename=path)
+          print(f'Checked {len(tracked)} tracked paths and {len(sources)} Python sources.')
+      - name: Windows packaging helpers with synthetic inputs
+        run: |
+          for suite in test_pipeline.py test_animation_libraries.py test_ordinary_audio.py test_pc_readme.py test_save_versions.py; do
+            python -B -m unittest discover -s tools/windows_release/tests -p "$suite" -v
+          done
+      - name: Android packaging helpers with synthetic inputs
+        run: python -B -m unittest discover -s tools/android_release/tests -v
+      - name: Snapshot importer
+        run: python -B -m unittest discover -s tests -p test_import_roster_snapshot.py -v
+      - name: Cooperative simulation source contract
+        run: python -B -m unittest discover -s tests -p test_cooperative_ai_source.py -v
+      - name: Bash launcher behavior
+        run: python -B -m unittest discover -s tests -p test_launchers.py -v
+      - name: Download verified Godot 4.6.3
+        run: |
+          curl --fail --location --retry 3 --output "$RUNNER_TEMP/godot.zip" https://github.com/godotengine/godot-builds/releases/download/4.6.3-stable/Godot_v4.6.3-stable_linux.x86_64.zip
+          echo "d0bc2113065e481c9c2c2b2c37daa4e8be3fe9e27f0ab9ab0b6096e9a37907f3  $RUNNER_TEMP/godot.zip" | sha256sum --check
+          unzip -q "$RUNNER_TEMP/godot.zip" -d "$RUNNER_TEMP/godot"
+      - name: Godot rules without private assets
+        shell: bash
+        run: |
+          for script in tests/test_phase_query.gd tests/test_tactical_resources.gd tests/test_lan_protocol.gd tests/test_navigation_broadphase.gd tests/test_tactical_league.gd tests/test_ai_outcome_rules.gd; do
+            timeout 60s "$RUNNER_TEMP/godot/Godot_v4.6.3-stable_linux.x86_64" --headless --path . --script "$script" 2>&1 | tee "$RUNNER_TEMP/godot-test.log"
+            if rg -q 'SCRIPT ERROR:|Parse Error:|^ERROR:' "$RUNNER_TEMP/godot-test.log"; then
+              exit 1
+            fi
+          done
+
+  windows-launcher:
+    runs-on: windows-latest
+    timeout-minutes: 10
+    env:
+      PYTHONUTF8: '1'
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: '3.11'
+      - name: Windows launcher behavior
+        run: python -B -m unittest discover -s tests -p test_launchers.py -v

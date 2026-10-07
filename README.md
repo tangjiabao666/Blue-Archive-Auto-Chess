@@ -1,5 +1,7 @@
 # Blue-A｜自走棋原型 · 中文源码说明
 
+[![Source checks](https://github.com/tangjiabao666/Blue-Archive-Auto-Chess/actions/workflows/source-checks.yml/badge.svg)](https://github.com/tangjiabao666/Blue-Archive-Auto-Chess/actions/workflows/source-checks.yml)
+
 基于 **Godot 4.6.3 Standard** 的自走棋与实时战术原型。准备阶段招募、合成和布阵；战斗阶段自动普攻、自动基础技能，玩家实时选择 EX 与战术移动；六轮后按积分排名。
 
 > **这是程序源码公开版，不是完整游戏发行包。** 原作模型、动画、纹理、肖像、音频及其提取配置没有随仓库提供；部分资源派生的生成代码也不公开。克隆后不能直接运行完整游戏、观看完整角色效果或导出可玩安装包。仓库没有资源下载器，也没有“只放一个原版客户端就自动补齐全部输入”的工具。
@@ -48,11 +50,15 @@ set "GODOT_EXE=C:\Tools\Godot\Godot_v4.6.3-stable_win64_console.exe"
 run-prototype.cmd
 ```
 
-脚本先导入资源再启动。也可在 Godot 项目管理器中导入 `project.godot`，导入完成后运行项目。Windows 脚本保留了旧本地工具位置的回退逻辑，建议显式设置 `GODOT_EXE`，避免误用其他引擎版本。
+脚本先检查关键输入和 Godot 4.6.3 stable 版本，再导入资源并启动。缺少资源时会提示具体路径和导入文档；检查仅覆盖关键入口，不代表所有资源已齐全。Windows 可用项目旁的 `Godot.exe` 或 PATH 中的 `godot`，也可通过 `GODOT_EXE` 明确指定引擎。导入失败会停止启动并保留退出码。
+
+公开仓库的 GitHub Actions 自动运行源码范围、Python 语法、合成输入工具测试、启动脚本和不依赖角色资源的 Godot 规则测试。完整游戏、原作资源与发布包验证仍需本地完整工程，详见[测试说明](docs/VALIDATION.zh-CN.md)。
 
 ## 性能与验证：目前不能承诺什么
 
 桌面缺省帧率上限为 60；已有用户明确保存的设置会保留。近期代码包含实时单帧推进上限 0.1 秒与导航保守粗筛优化，目的是避免长帧追赶和减少不必要的碰撞计算，**不等于已证明 Windows 卡死修复或稳定 60 FPS**。
+
+阶段查询改为直接读取规则字段，避免界面每帧多次查询时反复深拷贝整局数据和积分账本；回归检查覆盖查询结果、状态不变性和零快照调用。该改动没有修改战斗规则，也没有据此声称第二轮冻结已修复。
 
 45–70 秒是标准回合时长目标，目前未全面达成。当前短局规则在 90 模拟秒比较双方剩余绝对 HP，护盾不计入，HP 相等判平。低帧率、暂停或加载可能使现实耗时更长。
 
